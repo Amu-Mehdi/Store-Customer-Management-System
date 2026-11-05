@@ -36,3 +36,34 @@ def register_customer(first_name, last_name, phone, username, password_hash):
             cursor.close()
         if conn is not None:
             conn.close()
+
+def get_all_customers():
+    conn = None
+    cursor = None 
+    try:
+        query = "SELECT CustomerID, FirstName, LastName, Phone, Username, CreatedAt FROM Customers"
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        columns = [column[0] for column in cursor.description]
+        customers = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        if not customers:
+            print("No customers found.")
+            return
+
+        print(f"{'ID':<5} | {'FirstName':<12} | {'LastName':<12} | {'Phone':<12} | {'Username':<15} | {'CreatedAt':<20}")
+        print("-" * 85)
+        for customer in customers:
+            print(f"{customer['CustomerID']:<5} | {customer['FirstName']:<12} | {customer['LastName']:<12} | {customer['Phone']:<12} | {customer['Username']:<15} | {str(customer['CreatedAt']):<20}")
+    except Exception as e:
+        print("Failed to fetch customers.")
+    finally: 
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()
+
+
+
+
