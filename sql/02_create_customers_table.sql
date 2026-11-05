@@ -1,0 +1,12 @@
+USE StoreDB;
+
+CREATE TABLE Customers (
+    CustomerID INT IDENTITY(1,1) PRIMARY KEY,
+    FirstName NVARCHAR(50) NOT NULL,
+    LastName NVARCHAR(50) NOT NULL,
+    Phone VARCHAR(15) NOT NULL,
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+ALTER TABLE Customers ADD CONSTRAINT UQ_Customers_Phone UNIQUE (Phone);

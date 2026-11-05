@@ -1,0 +1,2 @@
+CREATE DATABASE StoreDB;
+USE StoreDB;
