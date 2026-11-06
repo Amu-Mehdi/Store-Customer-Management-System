@@ -124,6 +124,83 @@ def search_customer_menu():
     search_customers(choice, term)
 
 
+def get_customer_by_id(customer_id):
+    conn = None 
+    cursor = None 
+    try: 
+        query = "SELECT CustomerID, FirstName, LastName, Phone, Username, CreatedAt FROM Customers WHERE CustomerID = ?"
+        conn = get_connection() 
+        cursor = conn.cursor()
+        cursor.execute(query, (customer_id,))
+        return cursor.fetchone()
+    except Exception :
+        return None
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close() 
+    
+
+def update_customer(customer_id, first_name, last_name, phone):
+    conn = None
+    cursor = None
+    try:
+        query = "UPDATE Customers SET FirstName = ?, LastName = ?, Phone = ? WHERE CustomerID = ?"
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (first_name, last_name, phone, customer_id))
+        if cursor.rowcount == 0:
+            conn.rollback()
+            return "Customer not found."
+        conn.commit()
+        return "Customer updated successfully."
+    except Exception:
+        if conn is not None:
+            conn.rollback()
+        return "Update failed. Please try again."
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()
 
 
-search_customer_menu()
+def update_customer_menu():
+    try:
+        customer_id = int(input("Customer ID: ").strip())
+        customer = get_customer_by_id(customer_id) 
+        if customer is None: 
+            print("Customer not found.")
+            return
+        print(f"Current First Name: {customer.FirstName}")
+        print(f"Current Last Name: {customer.LastName}")
+        print(f"Current Phone: {customer.Phone}")
+
+        new_first_name = input("New First Name (leave empty to keep): ").strip()
+        if not new_first_name:
+            new_first_name = customer.FirstName
+
+        new_last_name = input("New Last Name (leave empty to keep): ").strip()
+        if not new_last_name:
+            new_last_name = customer.LastName
+
+        new_phone = input("New Phone (leave empty to keep): ").strip()
+        if not new_phone:
+            new_phone = customer.Phone
+
+        if not is_not_empty(new_first_name) or not is_not_empty(new_last_name):
+            print("First name and last name are required.")
+            return
+
+        if not is_valid_phone(new_phone):
+            print("Invalid phone number. It must start with 09 and have 11 digits.")
+            return
+        result = update_customer(customer_id, new_first_name, new_last_name, new_phone)
+        print(result)
+    except ValueError:
+        print("Customer ID must be a number.")
+    except Exception as e:
+        print("Something went wrong. Please try again.")
+        print("DEBUG:", repr(e))
+
