@@ -200,7 +200,48 @@ def update_customer_menu():
         print(result)
     except ValueError:
         print("Customer ID must be a number.")
-    except Exception as e:
+    except Exception :
         print("Something went wrong. Please try again.")
-        print("DEBUG:", repr(e))
+        
 
+def delete_customer(customer_id):
+    conn = None
+    cursor = None
+    try:
+        query = "DELETE FROM Customers WHERE CustomerID = ?"
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (customer_id,))
+        if cursor.rowcount == 0:
+            conn.rollback()
+            return "Customer not found."
+        conn.commit()
+        return "Customer deleted successfully."
+    except Exception:
+        if conn is not None:
+            conn.rollback()
+        return "Delete failed. Please try again."
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()
+
+def delete_customer_menu():
+    try:
+        customer_id = int(input("Customer ID: ").strip())
+        customer = get_customer_by_id(customer_id)
+        if customer is None:
+            print("Customer not found.")
+            return
+        print(f"ID: {customer.CustomerID} | Name: {customer.FirstName} {customer.LastName} | Phone: {customer.Phone}")
+        confirm = input("Are you sure you want to delete this customer? (yes/no): ").strip().lower()
+        if confirm != "yes":
+            print("Delete cancelled.")
+            return
+        result = delete_customer(customer_id)
+        print(result)
+    except ValueError:
+        print("Customer ID must be a number.")
+    except Exception:
+        print("Something went wrong. Please try again.")
